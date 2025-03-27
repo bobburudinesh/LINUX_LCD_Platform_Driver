@@ -1,4 +1,4 @@
-obj-m := gpio_sysfs.o
+obj-m := lcd_platform_driver.o
 ARCH=arm
 CROSS_COMPILE=arm-linux-gnueabihf-
 KERN_DIR=/home/dineshb/BBB_Workspace/LDD/source/linux_bbb_5.10/
