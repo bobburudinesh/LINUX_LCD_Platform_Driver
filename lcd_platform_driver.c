@@ -30,15 +30,24 @@ struct lcd_drv_private_data drv_data;
 
 
 ssize_t lcdcmd_store (struct device *dev, struct device_attribute *attr, const char *buf, size_t count) {
-	
-	return 0;	
+	int ret;
+	long value;
+	ret = kstrtol(buf, 0, &value);
+	if(!ret) {
+		/*call lcd send command function, write to gpios*/
+	}
+	return ret ? : count;	
 }
 DEVICE_ATTR_WO(lcdcmd);
 
 
 
 ssize_t lcdtext_store (struct device *dev, struct device_attribute *attr, const char *buf, size_t count) {
-	return 0;
+	if(buf) {
+		dev_info(dev,"Text: %s\n", buf);
+		/*call lcd write text, write to gpios*/
+	}
+	return count;
 }
 
 DEVICE_ATTR_WO(lcdtext);
@@ -46,11 +55,29 @@ DEVICE_ATTR_WO(lcdtext);
 
 
 ssize_t lcdscroll_store (struct device *dev, struct device_attribute *attr, const char *buf, size_t count) {
-	return 0;
+	int ret = 0;
+	struct lcd_dev_private_data *lcd_data = dev_get_drvdata(dev);
+	if(sysfs_streq(buf, "on")){
+		lcd_data->lcd_scroll = 1;
+		/*call lcd write commad, write to gpios*/
+	} else if(sysfs_streq(buf, "off")){
+		lcd_data->lcd_scroll = 0;
+		/*call lcd write command, write to gpios*/
+	} else {
+		ret = -EINVAL;
+	}
+	return ret? : count;
 }
 
 ssize_t lcdscroll_show (struct device *dev, struct device_attribute *attr, char *buf) {
-	return 0;
+	int ret;
+	struct lcd_dev_private_data *lcd_data = dev_get_drvdata(dev);
+	if(lcd_data->lcd_scroll) {
+		ret = sprintf(buf,"%s\n", "on");
+	} else {
+		ret = sprintf(buf, "%s\n", "off");
+	}
+	return ret;
 }
 
 DEVICE_ATTR_RW(lcdscroll);
@@ -58,11 +85,25 @@ DEVICE_ATTR_RW(lcdscroll);
 
 
 ssize_t lcdxy_store (struct device *dev, struct device_attribute *attr, const char *buf, size_t count) {
+	long value;
+	int ret;
+	int x,y;
+	struct lcd_dev_private_data *lcd_data = dev_get_drvdata(dev);
+	ret = kstrtol(buf,10,&value);
+	if(ret)
+		return ret;
+	x = value / 10;
+	y = value % 10;
+	ret = sprintf(lcd_data->lcdxy,"(%d,%d)",x,y);
+	/*call lcd set cursor function, write to gpios*/
 	return 0;
 }
 
 ssize_t lcdxy_show (struct device *dev, struct device_attribute *attr, char *buf) {
-	return 0;
+	int ret;
+        struct lcd_dev_private_data *lcd_data = dev_get_drvdata(dev);
+	ret = sprintf(buf,"%s\n", lcd_data->lcdxy);
+	return ret;
 }
 
 DEVICE_ATTR_RW(lcdxy);
@@ -130,8 +171,11 @@ int lcd_probe(struct platform_device *pdev) {
 
 	return 0;
 }
-void lcd_remove(struct platform_device *pdev) {
-	
+void lcd_remove(struct platform_device *pdev) {	
+	struct  lcd_dev_private_data *lcd_data = dev_get_drvdata(&pdev->dev);
+	/*call lcd deinit*/
+	dev_info(&pdev->dev, "remove called\n");
+	device_unregister(lcd_data->dev);
 }
 
 struct of_device_id lcd_device_match[] = {
