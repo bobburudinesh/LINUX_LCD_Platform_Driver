@@ -18,6 +18,8 @@ ssize_t lcdxy_store (struct device *dev, struct device_attribute *attr, const ch
 ssize_t lcdxy_show (struct device *dev, struct device_attribute *attr, char *buf);
 
 
+
+
 struct lcd_dev_private_data lcd_data = {
         .lcd_scroll = 0,
         .lcdxy = "(1,1)"
