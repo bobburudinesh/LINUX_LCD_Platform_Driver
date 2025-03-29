@@ -1,5 +1,5 @@
 obj-m := bonelcd_driver.o
-bonelcd_driver-objs += lcd_platform_driver.o gpio.o
+bonelcd_driver-objs += lcd_platform_driver.o gpio.o lcd.o
 ARCH=arm
 CROSS_COMPILE=arm-linux-gnueabihf-
 KERN_DIR=/home/dineshb/BBB_Workspace/LDD/source/linux_bbb_5.10/
