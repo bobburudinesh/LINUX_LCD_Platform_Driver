@@ -5,7 +5,7 @@
 #include <linux/of.h>
 #include <linux/gpio/consumer.h>
 #include "lcd_platform_driver.h"
-
+#include "lcd.h"
 
 int lcd_probe(struct platform_device *pdev);
 void lcd_remove(struct platform_device *pdev);
@@ -159,7 +159,7 @@ int lcd_probe(struct platform_device *pdev) {
 	return -EINVAL;
 	}
 	/*Configure direction of GPIO'S and init LCD*/
-	
+	lcd_init(dev);	
 	dev_info(dev,"LCD init successful\n");
 	ret = create_device_files(dev, &lcd_data);	
 	if(ret) {
@@ -174,6 +174,7 @@ int lcd_probe(struct platform_device *pdev) {
 void lcd_remove(struct platform_device *pdev) {	
 	struct  lcd_dev_private_data *lcd_data = dev_get_drvdata(&pdev->dev);
 	/*call lcd deinit*/
+	lcd_deinit(&pdev->dev);
 	dev_info(&pdev->dev, "remove called\n");
 	device_unregister(lcd_data->dev);
 }
