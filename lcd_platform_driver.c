@@ -35,6 +35,7 @@ ssize_t lcdcmd_store (struct device *dev, struct device_attribute *attr, const c
 	ret = kstrtol(buf, 0, &value);
 	if(!ret) {
 		/*call lcd send command function, write to gpios*/
+		lcd_send_command(dev, (u8)value);
 	}
 	return ret ? : count;	
 }
@@ -46,6 +47,7 @@ ssize_t lcdtext_store (struct device *dev, struct device_attribute *attr, const 
 	if(buf) {
 		dev_info(dev,"Text: %s\n", buf);
 		/*call lcd write text, write to gpios*/
+		lcd_write_text(dev, (char*)buf);
 	}
 	return count;
 }
@@ -60,9 +62,12 @@ ssize_t lcdscroll_store (struct device *dev, struct device_attribute *attr, cons
 	if(sysfs_streq(buf, "on")){
 		lcd_data->lcd_scroll = 1;
 		/*call lcd write commad, write to gpios*/
+		lcd_send_command(dev, 0x18);
 	} else if(sysfs_streq(buf, "off")){
 		lcd_data->lcd_scroll = 0;
 		/*call lcd write command, write to gpios*/
+		lcd_send_command(dev, 0x02);
+		lcd_send_command(dev, 0x10);
 	} else {
 		ret = -EINVAL;
 	}
@@ -96,6 +101,7 @@ ssize_t lcdxy_store (struct device *dev, struct device_attribute *attr, const ch
 	y = value % 10;
 	ret = sprintf(lcd_data->lcdxy,"(%d,%d)",x,y);
 	/*call lcd set cursor function, write to gpios*/
+	lcd_set_cursor(dev, x, y);
 	return 0;
 }
 
